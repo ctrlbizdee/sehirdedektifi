@@ -1,0 +1,50 @@
+name: Build Android bundle
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'app/**'
+      - settings.gradle
+      - .github/workflows/android-bundle.yml
+permissions:
+  contents: read
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - name: Build release bundle
+        run: gradle --no-daemon :app:bundleRelease
+      - name: Sign with upload key if configured
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          bundle=app/build/outputs/bundle/release/app-release.aab
+          if [[ -n "$UPLOAD_KEYSTORE_BASE64" ]]; then
+            key="$(mktemp)"
+            trap 'rm -f "$key"' EXIT
+            printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$key"
+            jarsigner -keystore "$key" -storepass:env UPLOAD_STORE_PASSWORD -keypass:env UPLOAD_KEY_PASSWORD -signedjar artifacts/sehir-dedektifi-release.aab "$bundle" "$UPLOAD_KEY_ALIAS"
+            jarsigner -verify artifacts/sehir-dedektifi-release.aab
+          else
+            cp "$bundle" artifacts/sehir-dedektifi-unsigned.aab
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sehir-dedektifi-android-bundle
+          path: artifacts/*.aab
+          if-no-files-found: error
