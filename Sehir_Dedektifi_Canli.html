@@ -267,6 +267,7 @@ byId("authForm").onsubmit = async event => {
     byId("password").value = "";
     loadTheme();
     home();
+    if (action === "register") byId("homeStatus").textContent = "Tebrikler, hesabın oluşturuldu!";
   } catch(error) { session = undefined; byId("authStatus").textContent = error.message; }
   finally { busy = false; for (const button of buttons) button.disabled = false; }
 };
