@@ -1,0 +1,13 @@
+plugins { id 'com.android.application' version '8.10.1' }
+
+android {
+    namespace 'com.ctrlbizdee.sehirdedektifi'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.ctrlbizdee.sehirdedektifi'
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName '1.0.0'
+    }
+}
