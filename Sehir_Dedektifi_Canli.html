@@ -3,19 +3,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#132c2b">
-<title>Şehir Dedektifi</title>
+<title>How Local Are You?</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f7f4e8;color:#132c2b;font:16px system-ui,sans-serif}main{max-width:650px;margin:auto;padding:24px 18px 40px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}.hero{padding:28px;border-radius:26px;background:#132c2b;color:#fff4d6}.hero p{color:#d7e6d4}h1,h2,p{margin:0 0 12px}h1{font:700 clamp(36px,9vw,64px)/1 Georgia,serif}h2{font-size:26px}button{font:inherit;font-weight:700;cursor:pointer;min-height:46px;border:0;border-radius:13px;padding:10px 16px;color:inherit;background:#eae5d1}button:focus-visible,summary:focus-visible{outline:3px solid #bc6136;outline-offset:3px}.primary{background:#132c2b;color:#fff4d6}.card,.options button{background:white;border:1px solid #dcd8c8;border-radius:18px;padding:18px}.stack{display:grid;gap:12px;margin-top:16px}.menu button{text-align:left}.menu small{display:block;font-weight:500;margin-top:4px}.stats{display:flex;justify-content:space-between;gap:8px;margin:14px 0}.options button{text-align:left;width:100%}.options button:disabled{cursor:default;opacity:1}.options .correct{background:#c8ead0;border-color:#317d4c}.options .wrong{background:#f6d6d0;border-color:#aa3e30}progress{width:100%;accent-color:#b76638;margin-bottom:16px}summary{cursor:pointer;font-weight:700}li{margin:8px 0}a{color:inherit}[hidden]{display:none!important}.big{font-size:34px;font-weight:800}
 
-:root{--paper:#f7f4e8;--ink:#132c2b;--panel:#fff;--soft:#eae5d1;--line:#dcd8c8;--hero:#132c2b;--onHero:#fff4d6;--accent:#b76638}
+:root{--paper:#f7f4e8;--ink:#132c2b;--panel:#fff;--soft:#dceee7;--line:#c3dbd2;--hero:#125550;--onHero:#fff4d6;--accent:#167e76}
 :root[data-theme="sea"]{--paper:#e8f5fa;--ink:#092f49;--panel:#fff;--soft:#d2e8f3;--line:#adcddd;--hero:#104765;--onHero:#fff;--accent:#02779d}
 :root[data-theme="sunset"]{--paper:#fff2e9;--ink:#4a281b;--panel:#fffdf8;--soft:#f9dcc9;--line:#edc5ac;--hero:#843b25;--onHero:#fff5ee;--accent:#bd4f2c}
-:root[data-theme="lavender"]{--paper:#f7effb;--ink:#352349;--panel:#fffbff;--soft:#e9dbf3;--line:#d8c4e5;--hero:#53346e;--onHero:#fff3ff;--accent:#8956a4}
+:root[data-theme="lavender"]{--paper:#edf3ea;--ink:#213a2d;--panel:#fcfefa;--soft:#dbe9d8;--line:#bfd0bd;--hero:#2d503e;--onHero:#fff;--accent:#417254}
 :root[data-theme="mono"]{--paper:#fff;--ink:#111;--panel:#fff;--soft:#eee;--line:#bcbcbc;--hero:#090909;--onHero:#fff;--accent:#222}
 body{background:var(--paper);color:var(--ink)}.hero,.primary{background:var(--hero);color:var(--onHero)}.hero p{color:var(--onHero)}button{background:var(--soft)}.card,.options button{background:var(--panel);border-color:var(--line)}progress{accent-color:var(--accent)}input,select{font:inherit;width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}label{display:grid;gap:6px}.actions{display:flex;flex-wrap:wrap;gap:8px}#authStatus{margin:0;padding:10px 12px;background:var(--soft);border-radius:10px}#authStatus:empty{display:none}#alanyaBoard{padding-left:24px}
 </style>
 <main>
-<header><strong>Şehir Dedektifi</strong><div class="actions"><button id="profileButton">Profilim</button><button id="settingsButton">Ayarlar</button></div></header>
+<header><strong>How Local Are You?</strong><div class="actions"><button id="profileButton">Profilim</button><button id="settingsButton">Ayarlar</button></div></header>
 <section id="auth" class="card" hidden>
 <h2>Oyuncu hesabı</h2><p>Canlı hesap. İlerlemen ve sıralaman cihazlar arasında ortak.</p>
 <form id="authForm" class="stack" novalidate><label>Kullanıcı adı<input id="username" autocomplete="username" minlength="3" maxlength="24" required></label>
@@ -23,14 +23,14 @@ body{background:var(--paper);color:var(--ink)}.hero,.primary{background:var(--he
 <div class="actions"><button class="primary" type="submit" value="login">Giriş yap</button><button type="submit" value="register">Hesap oluştur</button></div>
 <p id="authStatus" role="status" aria-live="polite"></p></form></section>
 <section id="settings" class="card" hidden><h2>Ayarlar</h2><div class="stack">
-<label>Tema<select id="theme"><option value="default">Alanya</option><option value="sea">İzmir</option><option value="lavender">Prag</option><option value="sunset">Roma</option><option value="mono">Black and White</option></select></label>
+<label>Tema<select id="theme"><option value="default">Alanya Turkuazı</option><option value="sea">İzmir Mavisi</option><option value="lavender">Prag Yeşili</option><option value="sunset">Roma Terrakotası</option><option value="mono">Black and White</option></select></label>
 <div class="actions"><button id="settingsBack">Ana sayfa</button><button id="logout">Çıkış yap</button></div></div></section>
 <section id="home" hidden><p id="homeStatus" role="status"></p>
 <div class="hero"><h1>Alanya</h1><p>Tarih, kıyı ve kültür ipuçlarını çöz.</p><strong id="heroProgress"></strong><p id="heroRanks"></p></div>
 <div class="stack menu">
-<button id="stage">10 Soruluk Etap<small>2 kolay, 6 orta, 2 zor. Tur sonuna kadar oyna.</small></button>
+<button id="stage">10 Soruluk Etap<small>Alanya’yı tanıdık yerlerden küçük keşiflere uzanan 10 soruyla keşfet.</small></button>
 <button id="series">Seri Modu<small>İlk yanlışta veya süre dolduğunda seri biter.</small></button>
-<details class="card"><summary>Oyun kuralları</summary><ul><li>Pakette 50 Alanya ve 10 ortak Türkiye sorusu var. Seride 50 Alanya sorusu kullanılır.</li><li>Her cevap için 10 saniye. İlk iki saniyede doğru cevaba +1.</li><li>Onluk etapta 10 doğruya +10. Seride 35 doğruya +350, 50 doğruya +1.000.</li><li>Alanya yüzden, yerel sorulardan en az bir kez doğru bildiklerinle artar.</li><li>Oyun eğlence amaçlıdır.</li></ul></details>
+<details class="card"><summary>Oyun kuralları</summary><ul><li>Etapta Alanya ve Türkiye soruları karışır. Seri Modu yalnızca Alanya sorularından oluşur.</li><li>Her cevap için 10 saniye. İlk iki saniyede doğru cevaba +1.</li><li>Onluk etapta 10 doğruya +10. Seride 35 doğruya +350, 50 doğruya +1.000.</li><li>Alanya yüzden, yerel sorulardan en az bir kez doğru bildiklerinle artar.</li><li>Oyun eğlence amaçlıdır.</li></ul></details>
 </div>
 </section>
 <section id="game" hidden>
