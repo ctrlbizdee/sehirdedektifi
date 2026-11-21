@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="tr" data-theme="lavender">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#132c2b">
+<title>Şehir Dedektifi</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f4e8;color:#132c2b;font:16px system-ui,sans-serif}main{max-width:650px;margin:auto;padding:24px 18px 40px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}.hero{padding:28px;border-radius:26px;background:#132c2b;color:#fff4d6}.hero p{color:#d7e6d4}h1,h2,p{margin:0 0 12px}h1{font:700 clamp(36px,9vw,64px)/1 Georgia,serif}h2{font-size:26px}button{font:inherit;font-weight:700;cursor:pointer;min-height:46px;border:0;border-radius:13px;padding:10px 16px;color:inherit;background:#eae5d1}button:focus-visible,summary:focus-visible{outline:3px solid #bc6136;outline-offset:3px}.primary{background:#132c2b;color:#fff4d6}.card,.options button{background:white;border:1px solid #dcd8c8;border-radius:18px;padding:18px}.stack{display:grid;gap:12px;margin-top:16px}.menu button{text-align:left}.menu small{display:block;font-weight:500;margin-top:4px}.stats{display:flex;justify-content:space-between;gap:8px;margin:14px 0}.options button{text-align:left;width:100%}.options button:disabled{cursor:default;opacity:1}.options .correct{background:#c8ead0;border-color:#317d4c}.options .wrong{background:#f6d6d0;border-color:#aa3e30}progress{width:100%;accent-color:#b76638;margin-bottom:16px}summary{cursor:pointer;font-weight:700}li{margin:8px 0}a{color:inherit}[hidden]{display:none!important}.big{font-size:34px;font-weight:800}
+
+:root{--paper:#f7f4e8;--ink:#132c2b;--panel:#fff;--soft:#dceee7;--line:#c3dbd2;--hero:#d8ede6;--onHero:#1b3732;--accent:#39756a}
+:root[data-theme="sea"]{--paper:#e8f5fa;--ink:#092f49;--panel:#fff;--soft:#d2e8f3;--line:#adcddd;--hero:#d7e9f4;--onHero:#153b54;--accent:#356f92}
+:root[data-theme="sunset"]{--paper:#fff2e9;--ink:#4a281b;--panel:#fffdf8;--soft:#f9dcc9;--line:#edc5ac;--hero:#f1dcd1;--onHero:#583528;--accent:#9c533d}
+:root[data-theme="lavender"]{--paper:#edf3ea;--ink:#213a2d;--panel:#fcfefa;--soft:#dbe9d8;--line:#bfd0bd;--hero:#dfeadc;--onHero:#284436;--accent:#477459}
+:root[data-theme="mono"]{--paper:#fff;--ink:#111;--panel:#fff;--soft:#eee;--line:#bcbcbc;--hero:#e8e8e8;--onHero:#111;--accent:#444}
+body{background:var(--paper);color:var(--ink)}.hero,.primary{background:var(--hero);color:var(--onHero)}.hero p{color:var(--onHero)}button{background:var(--soft)}.card,.options button{background:var(--panel);border-color:var(--line)}progress{accent-color:var(--accent)}input,select{font:inherit;width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}label{display:grid;gap:6px}.actions{display:flex;flex-wrap:wrap;gap:8px}#authStatus{margin:0;padding:10px 12px;background:var(--soft);border-radius:10px}#authStatus:empty{display:none}#alanyaBoard{padding-left:24px}
+.nav-button{display:inline-flex;align-items:center;padding:10px 16px;border-radius:13px;background:var(--soft);font-weight:700;text-decoration:none}.city-stats{list-style:none;padding:0}.city-stats li{display:grid;gap:4px;padding:12px;border:1px solid var(--line);border-radius:12px}.city-stats span{font-size:.9rem}.city-stats progress{margin:0;height:8px}.menu button.mode-button{display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px 16px;padding:16px 20px;border:2px solid var(--accent);border-radius:14px;background:var(--hero);box-shadow:0 3px 0 var(--accent);color:var(--onHero)}.mode-button small{grid-column:1;margin:0}.mode-button::after{content:"›";grid-column:2;grid-row:1 / span 2;font-size:1.8rem;line-height:1}.menu button.mode-button:hover{background:var(--soft)}.menu button.mode-button:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent)}
+.ranking-card h4{margin:0}.ranking-card p{margin:0}.ranking-card progress{height:8px;margin:0}.ranking-card{display:grid;gap:6px}.rank-leaders{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0;padding:0;list-style:none}.rank-leaders li{margin:0;overflow-wrap:anywhere}</style>
+<main>
+<header><a href="./index.html">Ana Sayfa</a><strong id="brand">Şehir Dedektifi</strong><div class="actions"><button id="profileButton">Profilim</button><button id="rankButton">Sıralama</button><button id="settingsButton">Ayarlar</button></div></header>
+<section id="auth" class="card" hidden>
+<h2>Oyuncu hesabı</h2><p>Canlı hesap. İlerlemen ve sıralaman cihazlar arasında ortak.</p>
+<form id="authForm" class="stack" novalidate><label>Kullanıcı adı<input id="username" autocomplete="username" minlength="3" maxlength="24" required></label>
+<label>Parola<input id="password" type="password" autocomplete="current-password" minlength="4" maxlength="72" required></label>
+<div class="actions"><button class="primary" type="submit" value="login">Giriş yap</button><button type="submit" value="register">Hesap oluştur</button></div>
+<p id="authStatus" role="status" aria-live="polite"></p></form></section>
+<section id="settings" class="card" hidden><h2>Ayarlar</h2><div class="stack">
+<label>Tema<select id="theme"><option value="default">Alanya Turkuazı</option><option value="sea">İzmir Mavisi</option><option value="lavender" selected>Prag Yeşili</option><option value="sunset">Roma Terrakotası</option><option value="mono">Black and White</option></select></label>
+<div class="actions"><button id="settingsBack">Ana sayfa</button><button id="logout">Çıkış yap</button></div></div></section>
+<section id="home" hidden><p id="homeStatus" role="status"></p>
+<div class="hero"><h1 id="cityTitle"></h1><p id="cityDescription"></p><strong id="heroProgress"></strong><p id="heroRanks"></p></div>
+<div class="stack menu">
+<button id="stage" class="mode-button" type="button">10 Soruluk Etap<small>Tanıdık yerlerden küçük keşiflere uzanan 10 soru.</small></button>
+<button id="series" class="mode-button" type="button">Seri Modu<small>İlk yanlışta veya süre dolduğunda seri biter.</small></button>
+<details class="card"><summary>Oyun kuralları</summary><ul><li>Her etap 10 soru içerir. Seri ilk yanlışta veya süre dolduğunda biter.</li><li>Her cevap için 10 saniye. İlk iki saniyede doğru cevaba +1.</li><li>Onluk etapta 10 doğruya +10. Seride 35 doğruya +350, 50 doğruya +1.000.</li><li>Şehri tanıma oranın, yerel sorulardan en az bir kez doğru bildiklerinle artar.</li><li>Oyun eğlence amaçlıdır.</li></ul></details>
+</div>
+</section>
+<section id="game" hidden>
+<button id="leaveRound" type="button">Turdan çık</button>
+<div class="stats"><span id="counter"></span><strong id="score"></strong><span id="time"></span></div>
+<progress id="timer" max="10000" value="10000" aria-label="Kalan süre"></progress>
+<h2 id="prompt" tabindex="-1"></h2>
+<div id="options" class="options stack"></div>
+
+<button id="next" class="primary stack" hidden></button><p id="gameStatus" role="status"></p><button id="retry" hidden>Tekrar dene</button>
+</section>
+<section id="result" class="card" hidden><h2>Tur sonucu</h2><p id="resultScore"></p><p class="big" id="resultProgress"></p><p id="resultCount"></p><p id="resultRanks"></p><div class="actions"><button id="replay" class="primary" hidden>Tekrar Oyna</button><button id="back"></button><a class="nav-button" href="./index.html">Ana Sayfa</a></div></section>
+<section id="profile" class="card" hidden><h2>Profilim</h2><p id="profileTitle" class="big"></p><p id="profileCount"></p><p id="localScore"></p><p id="profileRanks"></p><h3>Şehirlerim</h3><p id="citiesStatus" role="status"></p><ul id="cityStats" class="city-stats"></ul><h3 id="cityBoardTitle"></h3><ol id="alanyaBoard"></ol><h3>Global · İlk 10</h3><ol id="globalBoard"></ol><button id="homeButton">Ana sayfa</button></section>
+<section id="rankings" class="card" hidden>
+<h2>Sıralama</h2><h3>Genel sıralama · İlk 10</h3><p id="myGlobalRank"></p><ol id="rankingGlobal"></ol>
+<h3>Şehir sıralamaları · İlk 3</h3><p id="rankingStatus" role="status"></p><div id="rankingCities" class="stack"></div>
+</section>
+</main>
+<script>
+const params = new URLSearchParams(location.search);
+const cityId = params.get("city") ?? "alanya";
+const locale = params.get("lang") === "en" ? "en" : "tr";
+const cityCatalog = cityId === "alanya"
+  ? Promise.resolve(["alanya", "Alanya", "Alanya", "Muz ve avokado bahçeleri, kale surları ve Akdeniz güneşi.","Banana and avocado groves, castle walls and Mediterranean sun."])
+  : fetch("./cities.json").then(response => response.ok ? response.json() : []).then(cities => cities.find(city => city[0] === cityId));
+const translations = {"Şehir Dedektifi": "How Local Are You?", "Ana Sayfa": "Home", "Ana sayfa": "Home", "Profilim": "My Profile", "Ayarlar": "Settings", "Oyuncu hesabı": "Player account", "Canlı hesap. İlerlemen ve sıralaman cihazlar arasında ortak.": "Your progress and rankings sync across devices.", "Kullanıcı adı": "Username", "Parola": "Password", "Giriş yap": "Log in", "Hesap oluştur": "Create account", "Tema": "Theme", "Alanya Turkuazı": "Alanya Turquoise", "İzmir Mavisi": "Izmir Blue", "Prag Yeşili": "Prague Green", "Roma Terrakotası": "Rome Terracotta", "Çıkış yap": "Log out", "10 Soruluk Etap": "10-question round", "Tanıdık yerlerden küçük keşiflere uzanan 10 soru.": "Ten questions about familiar sights and local discoveries.", "Seri Modu": "Streak mode", "İlk yanlışta veya süre dolduğunda seri biter.": "The streak ends on a wrong answer or timeout.", "Oyun kuralları": "Game rules", "Her etap 10 soru içerir. Seri ilk yanlışta veya süre dolduğunda biter.": "Each round has 10 questions. A wrong answer or timeout ends a streak.", "Her cevap için 10 saniye. İlk iki saniyede doğru cevaba +1.": "You have 10 seconds per question. Answer correctly within two seconds for +1 point.", "Onluk etapta 10 doğruya +10. Seride 35 doğruya +350, 50 doğruya +1.000.": "Get +10 for a perfect round. Earn +350 for a streak of 35 and +1,000 for a streak of 50.", "Şehri tanıma oranın, yerel sorulardan en az bir kez doğru bildiklerinle artar.": "Your city knowledge score grows with each unique local question you answer correctly.", "Oyun eğlence amaçlıdır.": "This game is for entertainment.", "Turdan çık": "Leave Round", "Tekrar dene": "Try Again", "Tur sonucu": "Round Results", "Tekrar Oyna": "Play Again", "Şehirlerim": "My Cities", "Global · İlk 10": "Worldwide · Top 10", "Sıralama": "Rankings", "Genel sıralama · İlk 10": "Worldwide · Top 10", "Şehir sıralamaları · İlk 3": "City Rankings · Top 3", "Henüz sıra yok": "Unranked", " puan": " points", " · İlk 10": " · Top 10", "Şehirler yükleniyor…": "Loading cities…", "Şehir listesi alınamadı.": "Could not load the city list.", "Şehir bulunamadı.": "City not found.", "Bazı şehirlerin verileri yüklenemedi.": "Some city data could not be loaded.", "Şehir verileri yüklenemedi.": "Could not load city data.", "0 puan": "0 points", "Tur hazırlanıyor…": "Starting the round…", "Soru yükleniyor…": "Loading question…", "Soru ": "Question ", "Seri · Soru ": "Streak · Question ", " sn": " sec", " doğru · ": " correct · ", "Turdan çıktın.": "You left the round.", "Hesap oluşturuluyor…": "Creating account…", "Giriş yapılıyor…": "Logging in…", "Tebrikler, hesabın oluşturuldu!": "Your account is ready!", "Supabase bağlantısı kurulamadı. İnternet bağlantını kontrol edip tekrar dene.": "Could not connect. Check your internet connection and try again.", "Oyun sunucusu isteği tamamlayamadı. Tekrar dene.": "The game server could not complete the request. Try again.", "Oyun sunucusu işlemi tamamlayamadı.": "The game server could not complete the request."};
+const t = value => locale === "en" ? translations[value] ?? value : value;
+if (locale === "en") {
+  document.documentElement.lang = "en";
+  document.title = t(document.title);
+  const walker = document.createTreeWalker(document.querySelector("main"), NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const label = node.nodeValue.trim();
+    if (translations[label]) node.nodeValue = node.nodeValue.replace(label, t(label));
+  }
+  document.getElementById("timer").setAttribute("aria-label", "Time remaining");
+  document.querySelectorAll('a[href="./index.html"]').forEach(link => { link.href = "./index.html?lang=en"; });
+}
+const endpoint = "https://cakeynkyjxqrxeyurltz.supabase.co/rest/v1/rpc/city_detective_game";
+const publicKey = "sb_publishable_ZUFzra0hVmmXcXgAb71yOA_5VvHQ9eC";
+const byId = id => document.getElementById(id);
+const panels = ["auth","home","game","result","profile","settings","rankings"];
+const palettes = ["default","sea","lavender","sunset","mono"];
+const errors = locale === "en" ? {"invalid_username": "Use 3\u201324 letters, numbers, periods, hyphens, or underscores.", "invalid_password": "Use a password of at least 4 characters and at most 72 bytes.", "username_exists": "This username is taken. Log in or choose another name.", "invalid_credentials": "Incorrect username or password.", "rate_limited": "Too many attempts. Try again in a minute.", "session_expired": "Your session expired. Log in again.", "round_not_found": "This round is closed. Start a new round.", "timer_running": "Time has not run out yet."} : {
+  invalid_username:"Kullanıcı adı 3–24 karakter olmalı. İngilizce harf, rakam, nokta, kısa çizgi veya alt çizgi kullan.",
+  invalid_password:"En az 4 karakterli, en fazla 72 baytlık bir parola gir.",
+  username_exists:"Bu kullanıcı adı zaten var. Giriş yap veya başka bir ad seç.",
+  invalid_credentials:"Kullanıcı adı veya parola yanlış.",
+  rate_limited:"Çok fazla deneme yapıldı. Bir dakika sonra tekrar dene.",
+  session_expired:"Oturum süresi doldu. Tekrar giriş yap.",
+  round_not_found:"Bu tur artık açık değil. Yeni bir tur başlat.",
+  timer_running:"Sunucu süresi henüz dolmadı."
+};
+let session, profile, mode, roundId, question, timer, deadline, busy = false, sendAgain, profileRevision = 0;
+
+async function rpc(action, args = {}, requestedCity = cityId) {
+  let response;
+  try {
+    response = await fetch(requestedCity === "alanya" ? endpoint : endpoint + "_v2", {
+      method:"POST", headers:{apikey:publicKey,"Content-Type":"application/json"},
+      body:JSON.stringify({action,session_token:session?.token,...(requestedCity === "alanya" ? {} : {city_id:requestedCity,language_code:locale}),...args}),
+      signal:AbortSignal.timeout(20000)
+    });
+  } catch {
+    throw new Error(t("Supabase bağlantısı kurulamadı. İnternet bağlantını kontrol edip tekrar dene."));
+  }
+  if (!response.ok) throw new Error(t("Oyun sunucusu isteği tamamlayamadı. Tekrar dene."));
+  const value = await response.json();
+  if (value.error) {
+    const error = new Error(errors[value.error] ?? t("Oyun sunucusu işlemi tamamlayamadı."));
+    error.code = value.error;
+    throw error;
+  }
+  return value;
+}
+
+function show(name) {
+  for (const panel of panels) byId(panel).hidden = panel !== name;
+  byId("profileButton").hidden = !session || name === "game" || name === "profile";
+  byId("rankButton").hidden = !session || name === "game" || name === "rankings";
+  byId("settingsButton").hidden = !session || name === "game" || name === "settings";
+}
+
+function theme(value) {
+  const selected = palettes.includes(value) ? value : "lavender";
+  document.documentElement.dataset.theme = selected;
+  byId("theme").value = selected;
+}
+function themeKey() { return "sehir-dedektifi-online-theme:" + session.username.toLowerCase(); }
+function loadTheme() {
+  try {theme(localStorage.getItem(themeKey()));} catch {theme("lavender");}
+}
+function rank(value) { return value == null ? t("Henüz sıra yok") : (locale === "en" ? "#" + value : value + ". sıra"); }
+function rankText() {
+  return profile.city_name + ": " + rank(profile.city_rank) + " · Global: " + rank(profile.global_rank);
+}
+const demonyms = {alanya:"Alanyalısın", prague:"Praglısın", rome:"Romalısın", barcelona:"Barselonalısın", paris:"Parislisin", berlin:"Berlinlisin", istanbul:"İstanbullusun", adana:"Adanalısın", izmir:"İzmirlisin"};
+function percentage(known, total) { return Math.round(100 * known / (total || 1)); }
+function progressText() {
+  const percent = percentage(profile.city_known, profile.city_total);
+  return locale === "en" ? `${percent}% local in ${profile.city_name}!` : `%${percent} ${demonyms[cityId]}!`;
+}
+function detailText() { return locale === "en" ? profile.city_known + " of " + profile.city_total + " unique local questions answered correctly" : profile.city_total + " yerel sorudan " + profile.city_known + " farklı doğru"; }
+
+async function refresh() {
+  const revision = ++profileRevision;
+  const updated = await rpc("profile");
+  if (revision !== profileRevision) return;
+  const city = await cityCatalog;
+  if (revision !== profileRevision) return;
+  if (!city) throw new Error(t("Şehir bulunamadı."));
+  profile = updated.city_name ? updated : {
+    ...updated,
+    city_name: city[locale === "en" ? 2 : 1],
+    city_description: city[locale === "en" ? 4 : 3],
+    city_rank: updated.alanya_rank,
+    city_points: updated.alanya_points,
+    city_known: updated.alanya_known,
+    city_total: updated.alanya_total,
+    city_board: updated.alanya_board
+  };
+}
+function home() {
+  byId("homeStatus").textContent = "";
+  byId("cityTitle").textContent = profile.city_name;
+  byId("cityDescription").textContent = profile.city_description || "";
+  byId("heroProgress").textContent = progressText();
+  byId("heroRanks").textContent = rankText();
+  show("home");
+}
+function logout(message = "") {
+  clearInterval(timer);
+  profileRevision++;
+  session = profile = undefined;
+  try { sessionStorage.removeItem("hla-session"); } catch {}
+  theme("lavender");
+  byId("authStatus").textContent = message;
+  show("auth");
+}
+async function openHome() {
+  try { await refresh(); home(); }
+  catch (error) { if (error.code === "session_expired") logout(error.message); else {home(); byId("homeStatus").textContent = error.message;} }
+}
+function board(list, id) {
+  const rows = list.map(row => {
+    const item = document.createElement("li");
+    item.value = row.rank;
+    item.textContent = row.username + " · " + row.points + t(" puan");
+    return item;
+  });
+  byId(id).replaceChildren(...rows);
+}
+async function loadCityStats() {
+  const response = await fetch("./cities.json");
+  if (!response.ok) throw new Error(t("Şehir listesi alınamadı."));
+  const cities = [["alanya", "Alanya", "Alanya"], ...await response.json()];
+  return Promise.allSettled(cities.map(async ([id, tr, en]) => {
+    const stats = await rpc("profile", {}, id);
+    return {name:locale === "en" ? en : tr, stats};
+  }));
+}
+function personalRank(value) {
+  return (locale === "en" ? "Your rank · " : "Senin sıran · ") + rank(value);
+}
+async function openRankings() {
+  const current = session?.token;
+  show("rankings");
+  byId("rankingStatus").textContent = t("Şehirler yükleniyor…");
+  byId("rankingCities").replaceChildren();
+  try {
+    const stats = await rpc("profile");
+    if (session?.token !== current) return;
+    byId("myGlobalRank").textContent = personalRank(stats.global_rank);
+    board(stats.global_board, "rankingGlobal");
+    const cities = await loadCityStats();
+    if (session?.token !== current) return;
+    const rows = cities.filter(entry => entry.status === "fulfilled").map(entry => entry.value);
+    const collator = new Intl.Collator(locale);
+    rows.sort((a, b) =>
+      Number(b.stats.alanya_rank != null || b.stats.alanya_known > 0) - Number(a.stats.alanya_rank != null || a.stats.alanya_known > 0) ||
+      percentage(b.stats.alanya_known, b.stats.alanya_total) - percentage(a.stats.alanya_known, a.stats.alanya_total) ||
+      collator.compare(a.name, b.name)
+    );
+    for (const {name, stats} of rows) {
+      const card = document.createElement("article");
+      card.className = "card ranking-card";
+      const heading = document.createElement("h4");
+      const percent = percentage(stats.alanya_known, stats.alanya_total);
+      heading.textContent = name + " · " + new Intl.NumberFormat(locale, {style:"percent"}).format(percent / 100);
+      const bar = document.createElement("progress");
+      bar.max = 100;
+      bar.value = percent;
+      bar.setAttribute("aria-label", heading.textContent);
+      const mine = document.createElement("p");
+      mine.textContent = personalRank(stats.alanya_rank) + " · " + stats.alanya_points + t(" puan");
+      const leaders = document.createElement("ol");
+      leaders.className = "rank-leaders";
+      for (const player of stats.alanya_board.slice(0, 3)) {
+        const row = document.createElement("li");
+        row.value = player.rank;
+        row.textContent = player.rank + ". " + player.username;
+        leaders.append(row);
+      }
+      if (!leaders.children.length) {
+        const empty = document.createElement("p");
+        empty.textContent = locale === "en" ? "No ranked players yet." : "Henüz sıralanan oyuncu yok.";
+        card.append(heading, mine, bar, empty);
+      } else {
+        card.append(heading, mine, bar, leaders);
+      }
+      byId("rankingCities").append(card);
+    }
+    byId("rankingStatus").textContent = cities.some(entry => entry.status === "rejected") ? t("Bazı şehirlerin verileri yüklenemedi.") : "";
+  } catch (error) {
+    if (session?.token !== current) return;
+    if (error.code === "session_expired") logout(error.message);
+    else byId("rankingStatus").textContent = error.message;
+  }
+}
+async function openRequestedView() {
+  home();
+  if (params.get("view") === "profile") await openProfile();
+  if (params.get("view") === "rankings") await openRankings();
+}
+async function renderCityStats() {
+  const token = session?.token;
+  byId("cityStats").replaceChildren();
+  byId("citiesStatus").textContent = t("Şehirler yükleniyor…");
+  try {
+    const results = await loadCityStats();
+    if (session?.token !== token) return;
+    const rows = results.flatMap(result => {
+      if (result.status !== "fulfilled") return [];
+      const {name, stats} = result.value;
+      return [{name, stats, percent:percentage(stats.alanya_known, stats.alanya_total)}];
+    });
+    const collator = new Intl.Collator(locale);
+    rows.sort((a, b) => b.percent - a.percent || collator.compare(a.name, b.name));
+    for (const {name, stats, percent} of rows) {
+      const row = document.createElement("li");
+      const title = document.createElement("strong");
+      const icon = stats.alanya_rank === 1 ? "🏆 " : stats.alanya_rank <= 3 && stats.alanya_rank > 0 ? "🏅 " : "";
+      title.textContent = icon + name + " · %" + percent;
+      const info = document.createElement("span");
+      info.textContent = rank(stats.alanya_rank) + " · " + stats.alanya_points + t(" puan");
+      const bar = document.createElement("progress");
+      bar.max = 100;
+      bar.value = percent;
+      bar.setAttribute("aria-label", name + " · %" + percent);
+      row.append(title, info, bar);
+      byId("cityStats").append(row);
+    }
+    byId("citiesStatus").textContent = results.some(item => item.status === "rejected") ? t("Bazı şehirlerin verileri yüklenemedi.") : "";
+  } catch {
+    if (session?.token === token) byId("citiesStatus").textContent = t("Şehir verileri yüklenemedi.");
+  }
+}
+async function openProfile() {
+  try {
+    await refresh();
+    byId("profileTitle").textContent = progressText();
+    byId("profileCount").textContent = detailText();
+    byId("localScore").textContent = profile.username + " · " + profile.city_name + " " + profile.city_points + " puan · Global " + profile.global_points + t(" puan");
+    byId("profileRanks").textContent = rankText();
+    byId("cityBoardTitle").textContent = profile.city_name + t(" · İlk 10");
+    board(profile.city_board,"alanyaBoard");
+    board(profile.global_board,"globalBoard");
+    show("profile");
+    void renderCityStats();
+  } catch (error) {
+    if (error.code === "session_expired") logout(error.message);
+    else if (!byId("result").hidden) byId("resultRanks").textContent = error.message;
+    else byId("homeStatus").textContent = error.message;
+  }
+}
+
+async function task(operation, retry = operation) {
+  if (busy) return;
+  busy = true;
+  byId("leaveRound").disabled = true;
+  byId("gameStatus").textContent = "";
+  byId("retry").hidden = true;
+  try { await operation(); }
+  catch (error) {
+    if (error.code === "session_expired") logout(error.message);
+    else {
+      byId("gameStatus").textContent = error.message;
+      byId("retry").hidden = false;
+      sendAgain = retry;
+    }
+  } finally { busy = false; byId("leaveRound").disabled = false; }
+}
+
+function start(nextMode) {
+  clearInterval(timer);
+  mode = nextMode;
+  question = undefined;
+  byId("counter").textContent = "";
+  byId("score").textContent = t("0 puan");
+  byId("options").replaceChildren();
+  show("game");
+  task(async () => {
+    byId("prompt").textContent = t("Tur hazırlanıyor…");
+    const reply = await rpc("start",{mode});
+    roundId = reply.round_id;
+    await nextQuestion();
+  });
+}
+async function nextQuestion() {
+  clearInterval(timer);
+  byId("next").hidden = true;
+  byId("options").replaceChildren();
+  byId("prompt").textContent = t("Soru yükleniyor…");
+  const next = await rpc("next",{round_id:roundId});
+  question = next;
+  byId("counter").textContent = mode === "stage" ? t("Soru ") + question.position + "/10" : t("Seri · Soru ") + question.position;
+  byId("prompt").textContent = question.prompt;
+  byId("options").replaceChildren(...question.choices.map(choice => {
+    const button = document.createElement("button");
+    button.textContent = choice.label;
+    button.dataset.choice = choice.id;
+    button.onclick = () => answer(choice.id);
+    return button;
+  }));
+  deadline = performance.now() + question.remaining_ms;
+  byId("prompt").focus();
+  timer = setInterval(tick,50);
+  tick();
+}
+function tick() {
+  const remaining = Math.max(0, deadline - performance.now());
+  byId("timer").value = remaining;
+  byId("time").textContent = Math.ceil(remaining/1000) + t(" sn");
+  if (remaining === 0 && !busy) answer(null);
+}
+
+function answer(choice) {
+  if (busy || !question) return;
+  clearInterval(timer);
+  for (const button of byId("options").children) button.disabled = true;
+  const position = question.position;
+  const operation = async () => {
+    const reply = await rpc("answer",{round_id:roundId,question_position:position,choice});
+    byId("score").textContent = (reply.score ?? reply.round_points) + t(" puan");
+    for (const button of byId("options").children) {
+      if (button.textContent === reply.correct_label) button.classList.add("correct");
+      else if (Number(button.dataset.choice) === choice && reply.elapsed_ms < 10000) button.classList.add("wrong");
+    }
+    byId("next").textContent = reply.finished ? (locale === "en" ? "See Results" : "Sonucu Gör") : (locale === "en" ? "Next Question" : "Sonraki soru");
+    byId("next").onclick = () => task(reply.finished ? () => finish(reply) : nextQuestion);
+    byId("next").hidden = false;
+  };
+  task(operation);
+}
+
+async function finish(reply) {
+  await refresh();
+  showResult(reply.correct_count + t(" doğru · ") + reply.score + t(" puan"));
+}
+function showResult(summary) {
+  byId("replay").hidden = false;
+  byId("back").textContent = profile.city_name;
+  byId("resultScore").textContent = summary;
+  byId("resultProgress").textContent = progressText();
+  byId("resultCount").textContent = detailText();
+  byId("resultRanks").textContent = rankText();
+  show("result");
+}
+
+byId("authForm").onsubmit = async event => {
+  event.preventDefault();
+  if (busy) return;
+  const action = event.submitter?.value === "register" ? "register" : "login";
+  const name = byId("username").value.trim();
+  const password = byId("password").value;
+  if (!/^[A-Za-z0-9_.-]{3,24}$/.test(name)) {byId("authStatus").textContent = errors.invalid_username; return;}
+  if (Array.from(password).length < 4 || new TextEncoder().encode(password).length > 72) {byId("authStatus").textContent = errors.invalid_password; return;}
+  busy = true;
+  const buttons = byId("authForm").querySelectorAll("button");
+  for (const button of buttons) button.disabled = true;
+  byId("authStatus").textContent = action === "register" ? t("Hesap oluşturuluyor…") : t("Giriş yapılıyor…");
+  try {
+    session = await rpc(action,{player_name:name,player_password:password});
+    await refresh();
+    byId("password").value = "";
+    loadTheme();
+    await openRequestedView();
+    try { sessionStorage.setItem("hla-session", session.token); } catch {}
+    if (action === "register") byId("homeStatus").textContent = t("Tebrikler, hesabın oluşturuldu!");
+  } catch(error) { session = undefined; byId("authStatus").textContent = error.message; }
+  finally { busy = false; for (const button of buttons) button.disabled = false; }
+};
+byId("leaveRound").onclick = () => {
+  if (busy) return;
+  clearInterval(timer);
+  question = undefined;
+  roundId = undefined;
+  showResult(t("Turdan çıktın."));
+  byId("replay").focus();
+};
+byId("stage").onclick = () => start("stage");
+byId("series").onclick = () => start("series");
+byId("replay").onclick = () => start(mode);
+byId("retry").onclick = () => task(sendAgain);
+byId("back").onclick = byId("homeButton").onclick = byId("settingsBack").onclick = openHome;
+byId("profileButton").onclick = openProfile;
+byId("rankButton").onclick = openRankings;
+byId("settingsButton").onclick = () => show("settings");
+byId("logout").onclick = () => logout();
+byId("theme").onchange = () => {
+  theme(byId("theme").value);
+  try {localStorage.setItem(themeKey(),byId("theme").value);} catch {}
+};
+show("auth");
+(async () => {
+  try {
+    const token = sessionStorage.getItem("hla-session");
+    if (!token) return;
+    session = {token};
+    await refresh();
+    session.username = profile.username;
+    loadTheme();
+    await openRequestedView();
+  } catch {
+    logout();
+  }
+})();
+</script>
+</html>
+
