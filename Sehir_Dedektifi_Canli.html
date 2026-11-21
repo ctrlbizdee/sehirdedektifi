@@ -19,7 +19,7 @@ body{background:var(--paper);color:var(--ink)}.hero,.primary{background:var(--he
 <section id="auth" class="card" hidden>
 <h2>Oyuncu hesabı</h2><p>Canlı hesap. İlerlemen ve sıralaman cihazlar arasında ortak.</p>
 <form id="authForm" class="stack" novalidate><label>Kullanıcı adı<input id="username" autocomplete="username" minlength="3" maxlength="24" required></label>
-<label>Parola<input id="password" type="password" autocomplete="current-password" minlength="8" maxlength="72" required></label>
+<label>Parola<input id="password" type="password" autocomplete="current-password" minlength="4" maxlength="72" required></label>
 <div class="actions"><button class="primary" type="submit" value="login">Giriş yap</button><button type="submit" value="register">Hesap oluştur</button></div>
 <p id="authStatus" role="status" aria-live="polite"></p></form></section>
 <section id="settings" class="card" hidden><h2>Ayarlar</h2><div class="stack">
@@ -52,7 +52,7 @@ const panels = ["auth","home","game","result","profile","settings"];
 const palettes = ["default","sea","lavender","sunset","mono"];
 const errors = {
   invalid_username:"Kullanıcı adı 3–24 karakter olmalı. İngilizce harf, rakam, nokta, kısa çizgi veya alt çizgi kullan.",
-  invalid_password:"En az 8 karakterli, en fazla 72 baytlık bir parola gir.",
+  invalid_password:"En az 4 karakterli, en fazla 72 baytlık bir parola gir.",
   username_exists:"Bu kullanıcı adı zaten var. Giriş yap veya başka bir ad seç.",
   invalid_credentials:"Kullanıcı adı veya parola yanlış.",
   rate_limited:"Çok fazla deneme yapıldı. Bir dakika sonra tekrar dene.",
@@ -256,7 +256,7 @@ byId("authForm").onsubmit = async event => {
   const name = byId("username").value.trim();
   const password = byId("password").value;
   if (!/^[A-Za-z0-9_.-]{3,24}$/.test(name)) {byId("authStatus").textContent = errors.invalid_username; return;}
-  if (password.length < 8 || new TextEncoder().encode(password).length > 72) {byId("authStatus").textContent = errors.invalid_password; return;}
+  if (Array.from(password).length < 4 || new TextEncoder().encode(password).length > 72) {byId("authStatus").textContent = errors.invalid_password; return;}
   busy = true;
   const buttons = byId("authForm").querySelectorAll("button");
   for (const button of buttons) button.disabled = true;
