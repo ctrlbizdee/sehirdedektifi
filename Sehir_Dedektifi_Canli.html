@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#132c2b">
+<title>Şehir Dedektifi</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f4e8;color:#132c2b;font:16px system-ui,sans-serif}main{max-width:650px;margin:auto;padding:24px 18px 40px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}.hero{padding:28px;border-radius:26px;background:#132c2b;color:#fff4d6}.hero p{color:#d7e6d4}h1,h2,p{margin:0 0 12px}h1{font:700 clamp(36px,9vw,64px)/1 Georgia,serif}h2{font-size:26px}button{font:inherit;font-weight:700;cursor:pointer;min-height:46px;border:0;border-radius:13px;padding:10px 16px;color:inherit;background:#eae5d1}button:focus-visible,summary:focus-visible{outline:3px solid #bc6136;outline-offset:3px}.primary{background:#132c2b;color:#fff4d6}.card,.options button{background:white;border:1px solid #dcd8c8;border-radius:18px;padding:18px}.stack{display:grid;gap:12px;margin-top:16px}.menu button{text-align:left}.menu small{display:block;font-weight:500;margin-top:4px}.stats{display:flex;justify-content:space-between;gap:8px;margin:14px 0}.options button{text-align:left;width:100%}.options button:disabled{cursor:default;opacity:1}.options .correct{background:#c8ead0;border-color:#317d4c}.options .wrong{background:#f6d6d0;border-color:#aa3e30}progress{width:100%;accent-color:#b76638;margin-bottom:16px}summary{cursor:pointer;font-weight:700}li{margin:8px 0}a{color:inherit}[hidden]{display:none!important}.big{font-size:34px;font-weight:800}
+
+:root{--paper:#f7f4e8;--ink:#132c2b;--panel:#fff;--soft:#eae5d1;--line:#dcd8c8;--hero:#132c2b;--onHero:#fff4d6;--accent:#b76638}
+:root[data-theme="sea"]{--paper:#e8f5fa;--ink:#092f49;--panel:#fff;--soft:#d2e8f3;--line:#adcddd;--hero:#104765;--onHero:#fff;--accent:#02779d}
+:root[data-theme="sunset"]{--paper:#fff2e9;--ink:#4a281b;--panel:#fffdf8;--soft:#f9dcc9;--line:#edc5ac;--hero:#843b25;--onHero:#fff5ee;--accent:#bd4f2c}
+:root[data-theme="lavender"]{--paper:#f7effb;--ink:#352349;--panel:#fffbff;--soft:#e9dbf3;--line:#d8c4e5;--hero:#53346e;--onHero:#fff3ff;--accent:#8956a4}
+:root[data-theme="mono"]{--paper:#fff;--ink:#111;--panel:#fff;--soft:#eee;--line:#bcbcbc;--hero:#090909;--onHero:#fff;--accent:#222}
+body{background:var(--paper);color:var(--ink)}.hero,.primary{background:var(--hero);color:var(--onHero)}.hero p{color:var(--onHero)}button{background:var(--soft)}.card,.options button{background:var(--panel);border-color:var(--line)}progress{accent-color:var(--accent)}input,select{font:inherit;width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}label{display:grid;gap:6px}.actions{display:flex;flex-wrap:wrap;gap:8px}#authStatus{margin:0;padding:10px 12px;background:var(--soft);border-radius:10px}#authStatus:empty{display:none}#alanyaBoard{padding-left:24px}
+</style>
+<main>
+<header><strong>Şehir Dedektifi</strong><div class="actions"><button id="profileButton">Profilim</button><button id="settingsButton">Ayarlar</button></div></header>
+<section id="auth" class="card" hidden>
+<h2>Oyuncu hesabı</h2><p>Canlı hesap. İlerlemen ve sıralaman cihazlar arasında ortak.</p>
+<form id="authForm" class="stack" novalidate><label>Kullanıcı adı<input id="username" autocomplete="username" minlength="3" maxlength="24" required></label>
+<label>Parola<input id="password" type="password" autocomplete="current-password" minlength="8" maxlength="72" required></label>
+<div class="actions"><button class="primary" type="submit" value="login">Giriş yap</button><button type="submit" value="register">Hesap oluştur</button></div>
+<p id="authStatus" role="status" aria-live="polite"></p></form></section>
+<section id="settings" class="card" hidden><h2>Ayarlar</h2><div class="stack">
+<label>Tema<select id="theme"><option value="default">Alanya</option><option value="sea">İzmir</option><option value="lavender">Prag</option><option value="sunset">Roma</option><option value="mono">Black and White</option></select></label>
+<div class="actions"><button id="settingsBack">Ana sayfa</button><button id="logout">Çıkış yap</button></div></div></section>
+<section id="home" hidden><p id="homeStatus" role="status"></p>
+<div class="hero"><h1>Alanya</h1><p>Tarih, kıyı ve kültür ipuçlarını çöz.</p><strong id="heroProgress"></strong><p id="heroRanks"></p></div>
+<div class="stack menu">
+<button id="stage">10 Soruluk Etap<small>2 kolay, 6 orta, 2 zor. Tur sonuna kadar oyna.</small></button>
+<button id="series">Seri Modu<small>İlk yanlışta veya süre dolduğunda seri biter.</small></button>
+<details class="card"><summary>Oyun kuralları</summary><ul><li>Pakette 50 Alanya ve 10 ortak Türkiye sorusu var. Seride 50 Alanya sorusu kullanılır.</li><li>Her cevap için 10 saniye. İlk iki saniyede doğru cevaba +1.</li><li>Onluk etapta 10 doğruya +10. Seride 35 doğruya +350, 50 doğruya +1.000.</li><li>Alanya yüzden, yerel sorulardan en az bir kez doğru bildiklerinle artar.</li><li>Oyun eğlence amaçlıdır.</li></ul></details>
+</div>
+</section>
+<section id="game" hidden>
+<div class="stats"><span id="counter"></span><strong id="score"></strong><span id="time"></span></div>
+<progress id="timer" max="10000" value="10000" aria-label="Kalan süre"></progress>
+<h2 id="prompt" tabindex="-1"></h2>
+<div id="options" class="options stack"></div>
+<div id="feedback" class="card stack" aria-live="polite" hidden></div>
+<button id="next" class="primary stack" hidden></button><p id="gameStatus" role="status"></p><button id="retry" hidden>Tekrar dene</button>
+</section>
+<section id="result" class="card" hidden><h2>Tur sonucu</h2><p id="resultScore"></p><p class="big" id="resultProgress"></p><p id="resultCount"></p><p id="resultRanks"></p><button id="replay" class="primary">Tekrar oyna</button> <button id="back">Ana sayfa</button></section>
+<section id="profile" class="card" hidden><h2>Profilim</h2><p id="profileTitle" class="big"></p><p id="profileCount"></p><p id="localScore"></p><p id="profileRanks"></p><h3>Alanya · İlk 10</h3><ol id="alanyaBoard"></ol><h3>Global · İlk 10</h3><ol id="globalBoard"></ol><button id="homeButton">Ana sayfa</button></section>
+</main>
+<script>
+const endpoint = "https://cakeynkyjxqrxeyurltz.supabase.co/rest/v1/rpc/city_detective_game";
+const publicKey = "sb_publishable_ZUFzra0hVmmXcXgAb71yOA_5VvHQ9eC";
+const byId = id => document.getElementById(id);
+const panels = ["auth","home","game","result","profile","settings"];
+const palettes = ["default","sea","lavender","sunset","mono"];
+const errors = {
+  invalid_username:"Kullanıcı adı 3–24 karakter olmalı. İngilizce harf, rakam, nokta, kısa çizgi veya alt çizgi kullan.",
+  invalid_password:"En az 8 karakterli, en fazla 72 baytlık bir parola gir.",
+  username_exists:"Bu kullanıcı adı zaten var. Giriş yap veya başka bir ad seç.",
+  invalid_credentials:"Kullanıcı adı veya parola yanlış.",
+  rate_limited:"Çok fazla deneme yapıldı. Bir dakika sonra tekrar dene.",
+  session_expired:"Oturum süresi doldu. Tekrar giriş yap.",
+  round_not_found:"Bu tur artık açık değil. Yeni bir tur başlat.",
+  timer_running:"Sunucu süresi henüz dolmadı."
+};
+let session, profile, mode, roundId, question, timer, deadline, busy = false, sendAgain, profileRevision = 0;
+
+async function rpc(action, args = {}) {
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      method:"POST", headers:{apikey:publicKey,"Content-Type":"application/json"},
+      body:JSON.stringify({action,session_token:session?.token,...args}),
+      signal:AbortSignal.timeout(20000)
+    });
+  } catch {
+    throw new Error("Supabase bağlantısı kurulamadı. İnternet bağlantını kontrol edip tekrar dene.");
+  }
+  if (!response.ok) throw new Error("Oyun sunucusu isteği tamamlayamadı. Tekrar dene.");
+  const value = await response.json();
+  if (value.error) {
+    const error = new Error(errors[value.error] ?? "Oyun sunucusu işlemi tamamlayamadı.");
+    error.code = value.error;
+    throw error;
+  }
+  return value;
+}
+
+function show(name) {
+  for (const panel of panels) byId(panel).hidden = panel !== name;
+  byId("profileButton").hidden = !session || name === "game" || name === "profile";
+  byId("settingsButton").hidden = !session || name === "game" || name === "settings";
+}
+
+function theme(value) {
+  const selected = palettes.includes(value) ? value : "default";
+  document.documentElement.dataset.theme = selected;
+  byId("theme").value = selected;
+}
+function themeKey() { return "sehir-dedektifi-online-theme:" + session.username.toLowerCase(); }
+function loadTheme() {
+  try {theme(localStorage.getItem(themeKey()));} catch {theme("default");}
+}
+function rank(value) { return value == null ? "Henüz sıra yok" : value + ". sıra"; }
+function rankText() {
+  return "Alanya: " + rank(profile.alanya_rank) + " · Global: " + rank(profile.global_rank);
+}
+function progressText() {
+  return "%" + Math.round(profile.alanya_known * 100 / (profile.alanya_total || 1)) + " Alanyalısın";
+}
+function detailText() { return profile.alanya_total + " yerel sorudan " + profile.alanya_known + " farklı doğru"; }
+
+async function refresh() {
+  const revision = ++profileRevision;
+  const updated = await rpc("profile");
+  if (revision === profileRevision) profile = updated;
+}
+function home() {
+  byId("homeStatus").textContent = "";
+  byId("heroProgress").textContent = progressText();
+  byId("heroRanks").textContent = rankText();
+  show("home");
+}
+function logout(message = "") {
+  clearInterval(timer);
+  profileRevision++;
+  session = profile = undefined;
+  theme("default");
+  byId("authStatus").textContent = message;
+  show("auth");
+}
+async function openHome() {
+  try { await refresh(); home(); }
+  catch (error) { if (error.code === "session_expired") logout(error.message); else {home(); byId("homeStatus").textContent = error.message;} }
+}
+function board(list, id) {
+  const rows = list.map(row => {
+    const item = document.createElement("li");
+    item.value = row.rank;
+    item.textContent = row.username + " · " + row.points + " puan";
+    return item;
+  });
+  byId(id).replaceChildren(...rows);
+}
+async function openProfile() {
+  try {
+    await refresh();
+    byId("profileTitle").textContent = progressText();
+    byId("profileCount").textContent = detailText();
+    byId("localScore").textContent = profile.username + " · Alanya " + profile.alanya_points + " puan · Global " + profile.global_points + " puan";
+    byId("profileRanks").textContent = rankText();
+    board(profile.alanya_board,"alanyaBoard");
+    board(profile.global_board,"globalBoard");
+    show("profile");
+  } catch (error) {
+    if (error.code === "session_expired") logout(error.message);
+    else if (!byId("result").hidden) byId("resultRanks").textContent = error.message;
+    else byId("homeStatus").textContent = error.message;
+  }
+}
+
+async function task(operation, retry = operation) {
+  if (busy) return;
+  busy = true;
+  byId("gameStatus").textContent = "";
+  byId("retry").hidden = true;
+  try { await operation(); }
+  catch (error) {
+    if (error.code === "session_expired") logout(error.message);
+    else {
+      byId("gameStatus").textContent = error.message;
+      byId("retry").hidden = false;
+      sendAgain = retry;
+    }
+  } finally { busy = false; }
+}
+
+function start(nextMode) {
+  clearInterval(timer);
+  mode = nextMode;
+  question = undefined;
+  byId("counter").textContent = "";
+  byId("score").textContent = "0 puan";
+  byId("options").replaceChildren();
+  show("game");
+  task(async () => {
+    byId("prompt").textContent = "Tur hazırlanıyor…";
+    const reply = await rpc("start",{mode});
+    roundId = reply.round_id;
+    await nextQuestion();
+  });
+}
+async function nextQuestion() {
+  clearInterval(timer);
+  byId("feedback").hidden = byId("next").hidden = true;
+  byId("options").replaceChildren();
+  byId("prompt").textContent = "Soru yükleniyor…";
+  const next = await rpc("next",{round_id:roundId});
+  question = next;
+  byId("counter").textContent = mode === "stage" ? "Soru " + question.position + "/10" : "Seri · Soru " + question.position;
+  byId("prompt").textContent = question.prompt;
+  byId("options").replaceChildren(...question.choices.map(choice => {
+    const button = document.createElement("button");
+    button.textContent = choice.label;
+    button.dataset.choice = choice.id;
+    button.onclick = () => answer(choice.id);
+    return button;
+  }));
+  deadline = performance.now() + question.remaining_ms;
+  byId("prompt").focus();
+  timer = setInterval(tick,50);
+  tick();
+}
+function tick() {
+  const remaining = Math.max(0, deadline - performance.now());
+  byId("timer").value = remaining;
+  byId("time").textContent = Math.ceil(remaining/1000) + " sn";
+  if (remaining === 0 && !busy) answer(null);
+}
+
+function answer(choice) {
+  if (busy || !question) return;
+  clearInterval(timer);
+  for (const button of byId("options").children) button.disabled = true;
+  const position = question.position;
+  const operation = async () => {
+    const reply = await rpc("answer",{round_id:roundId,question_position:position,choice});
+    byId("score").textContent = (reply.score ?? reply.round_points) + " puan";
+    for (const button of byId("options").children) {
+      if (button.textContent === reply.correct_label) button.classList.add("correct");
+      else if (Number(button.dataset.choice) === choice && reply.elapsed_ms < 10000) button.classList.add("wrong");
+    }
+    const title = document.createElement("strong");
+    title.textContent = reply.correct ? "Doğru" : (reply.elapsed_ms >= 10000 ? "Süre doldu" : "Yanlış") + " · Doğru cevap " + reply.correct_label;
+    const explanation = document.createElement("span");
+    explanation.textContent = reply.explanation;
+    byId("feedback").replaceChildren(title,explanation);
+    byId("feedback").hidden = false;
+    byId("next").textContent = reply.finished ? "Sonucu gör" : "Sonraki soru";
+    byId("next").onclick = () => task(reply.finished ? () => finish(reply) : nextQuestion);
+    byId("next").hidden = false;
+  };
+  task(operation);
+}
+
+async function finish(reply) {
+  await refresh();
+  byId("resultScore").textContent = reply.correct_count + " doğru · " + reply.score + " puan";
+  byId("resultProgress").textContent = progressText();
+  byId("resultCount").textContent = detailText();
+  byId("resultRanks").textContent = rankText();
+  show("result");
+}
+
+byId("authForm").onsubmit = async event => {
+  event.preventDefault();
+  if (busy) return;
+  const action = event.submitter?.value === "register" ? "register" : "login";
+  const name = byId("username").value.trim();
+  const password = byId("password").value;
+  if (!/^[A-Za-z0-9_.-]{3,24}$/.test(name)) {byId("authStatus").textContent = errors.invalid_username; return;}
+  if (password.length < 8 || new TextEncoder().encode(password).length > 72) {byId("authStatus").textContent = errors.invalid_password; return;}
+  busy = true;
+  const buttons = byId("authForm").querySelectorAll("button");
+  for (const button of buttons) button.disabled = true;
+  byId("authStatus").textContent = action === "register" ? "Hesap oluşturuluyor…" : "Giriş yapılıyor…";
+  try {
+    session = await rpc(action,{player_name:name,player_password:password});
+    await refresh();
+    byId("password").value = "";
+    loadTheme();
+    home();
+  } catch(error) { session = undefined; byId("authStatus").textContent = error.message; }
+  finally { busy = false; for (const button of buttons) button.disabled = false; }
+};
+byId("stage").onclick = () => start("stage");
+byId("series").onclick = () => start("series");
+byId("replay").onclick = () => start(mode);
+byId("retry").onclick = () => task(sendAgain);
+byId("back").onclick = byId("homeButton").onclick = byId("settingsBack").onclick = openHome;
+byId("profileButton").onclick = openProfile;
+byId("settingsButton").onclick = () => show("settings");
+byId("logout").onclick = () => logout();
+byId("theme").onchange = () => {
+  theme(byId("theme").value);
+  try {localStorage.setItem(themeKey(),byId("theme").value);} catch {}
+};
+show("auth");
+
+</script>
+</html>
