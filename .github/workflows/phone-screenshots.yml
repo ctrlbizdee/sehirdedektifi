@@ -1,0 +1,57 @@
+name: Capture phone screenshots
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/phone-screenshots.yml
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Capture app screens
+        run: |
+          cat > capture.cjs <<'CAPTURE'
+          const fs = require('fs');
+          const {chromium} = require('playwright');
+          const root='app/src/main/assets';
+          const q={question:"Flavius Amfitiyatrosu olarak da bilinen yapı hangisi?",options:["Pantheon","Circo Massimo","Colosseo","Terme di Caracalla"],answer_index:2};
+          (async()=>{
+          const browser=await chromium.launch({args:['--no-sandbox']});
+          const page=await browser.newPage({viewport:{width:360,height:640},deviceScaleFactor:3,isMobile:true,hasTouch:true});
+          await page.route('https://capture.example/**',async route=>{
+           const path=new URL(route.request().url()).pathname.slice(1)||'index.html';
+           await route.fulfill({path:root+'/'+path,contentType:({'html':'text/html','js':'application/javascript','json':'application/json'})[path.split('.').pop()]+'; charset=UTF-8'});
+          });
+          await page.route('https://*.supabase.co/**',async route=>{
+           const headers={'access-control-allow-origin':'https://capture.example','access-control-allow-headers':'apikey, content-type','access-control-allow-methods':'POST, OPTIONS'};
+           if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
+           const {action}=route.request().postDataJSON();
+           const profile={username:'Gezgin',alanya_rank:null,alanya_points:0,alanya_known:0,alanya_total:50,alanya_board:[],global_rank:null,global_points:0,global_board:[]};
+           const choices=[q.answer_index,...q.options.map((_,i)=>i).filter(i=>i!==q.answer_index).slice(0,3)].reverse().map((i,j)=>({id:j+1,label:q.options[i]}));
+           await route.fulfill({headers,json:action==='profile'?profile:action==='start'?{round_id:'capture'}:{position:1,prompt:q.question,choices,remaining_ms:10000}});
+          });
+          await page.addInitScript(()=>sessionStorage.setItem('hla-session','local-capture'));
+          await page.goto('https://capture.example/index.html');
+          await page.getByRole('link',{name:/Oyna · Roma/}).waitFor();
+          await page.screenshot({path:'Sehir_Dedektifi_Telefon_01_Sehirler.png'});
+          await page.getByRole('link',{name:/Oyna · Roma/}).click();
+          await page.locator('#stage').click();
+          await page.locator('#options button').first().waitFor();
+          await page.screenshot({path:'Sehir_Dedektifi_Telefon_02_Yarisma.png'});
+          await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          CAPTURE
+          node capture.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sehir-dedektifi-telefon-ekranlari
+          path: Sehir_Dedektifi_Telefon_*.png
+          if-no-files-found: error
